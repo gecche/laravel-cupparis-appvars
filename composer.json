@@ -1,0 +1,50 @@
+{
+    "name": "gecche/laravel-cupparis-appvars",
+    "description": "Pacchetto per gestire parametri global e per utente",
+    "keywords": ["laravel", "assets"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Giacomo Terreni",
+            "email": "giacomo.terreni@gmail.com"
+        }
+    ],
+    "require": {
+        "laravel/framework": "^6.0"
+    },
+    "require-dev": {
+        "mockery/mockery": "^1.0",
+        "phpunit/phpunit": "^8.0",
+        "limedeck/phpunit-detailed-printer": "^5.0",
+        "orchestra/testbench": "^4.0"
+    },
+    "autoload": {
+        "classmap": [
+
+        ],
+        "psr-4": {
+            "Gecche\\Cupparis\\AppVars\\": "src"
+        },
+        "files": [
+
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Gecche\\Cupparis\\AppVars\\AppVarsServiceProvider"
+            ],
+            "aliases": {
+                "AppVars": "Gecche\\Cupparis\\AppVars\\Facades\\AppVarsServiceProvider"
+            }
+        }
+    }
+}
