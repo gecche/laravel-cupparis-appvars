@@ -45,6 +45,7 @@ class AppVarsManager implements AppVarInterface
 
     public function setSessionValue($name, $value, $userId = null)
     {
+        $userId = $this->resolveUser($userId);
         if (!in_array($name, $this->sessionableVars))
             return;
         $fullUserName = $this->createFullUserName($name, $userId);
@@ -53,6 +54,7 @@ class AppVarsManager implements AppVarInterface
 
     public function setValue($name, $value, $userId = null)
     {
+        $userId = $this->resolveUser($userId);
         $this->setSessionValue($name, $value, $userId);
 
         $appVarModel = $this->findDbVar($name,$userId);
@@ -60,7 +62,7 @@ class AppVarsManager implements AppVarInterface
             $appVarModel->value = $value;
             $appVarModel->save();
         } else {
-            ($this->modelName)::create(['id' => $name, 'value' => $value, 'user_id' => $userId]);
+            ($this->modelName)::create(['name' => $name, 'value' => $value, 'user_id' => $userId]);
         }
     }
 
@@ -108,7 +110,7 @@ class AppVarsManager implements AppVarInterface
     protected function initializeDbVar($name, $userId = null)
     {
         $initialValue = Arr::get($this->initialValues, $name);
-        return ($this->modelName)::create(['id' => $name, 'value' => $initialValue, 'user_id' => $userId]);
+        return ($this->modelName)::create(['name' => $name, 'value' => $initialValue, 'user_id' => $userId]);
     }
 
 
