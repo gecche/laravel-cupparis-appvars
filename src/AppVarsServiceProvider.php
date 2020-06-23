@@ -12,9 +12,9 @@ class AppVarsServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-        $this->app->singleton('app_vars', function($app)
+        $this->app->singleton('app_vars', function()
         {
-            return new AppVarsManager($app['files']);
+            return new AppVarsManager();
         });
 	}
 
@@ -26,6 +26,11 @@ class AppVarsServiceProvider extends ServiceProvider {
         $this->publishes([
             __DIR__ . '/../config/cupparis-appvars.php' => config_path('cupparis-appvars.php'),
         ], 'public');
+
+        $this->publishes([
+            __DIR__ . '/../database/migrations' => database_path('migrations'),
+        ], 'public');
+
     }
 
 
