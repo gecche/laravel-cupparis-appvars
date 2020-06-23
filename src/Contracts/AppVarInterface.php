@@ -10,6 +10,8 @@ interface  AppVarInterface
 
     public function getValue($name, $userId = null);
 
+    public function getSessionValue($name, $userId = null);
+
     public function getOptions($name, $userId = null);
 
 

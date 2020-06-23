@@ -66,13 +66,19 @@ class AppVarsManager implements AppVarInterface
         }
     }
 
-    public function getValue($name, $userId = null)
+    public function getSessionValue($name, $userId = null)
     {
         $userId = $this->resolveUser($userId);
         $appVarData = $this->getSessionVar($name, $userId) ?: $this->getDbVar($name, $userId);
         return current($appVarData);
     }
 
+    public function getValue($name, $userId = null)
+    {
+        $userId = $this->resolveUser($userId);
+        $appVarData = $this->getDbVar($name, $userId);
+        return current($appVarData);
+    }
 
     public function getOptions($name, $userId = null) {
         $methodName = 'getOptions' . Str::studly($name);
