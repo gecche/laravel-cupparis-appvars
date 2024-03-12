@@ -3,7 +3,7 @@
 namespace Gecche\Cupparis\AppVars;
 
 use Gecche\Cupparis\AppVars\Contracts\AppVarInterface;
-use Illuminate\Http\File;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
