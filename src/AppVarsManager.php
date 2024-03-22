@@ -47,6 +47,7 @@ class AppVarsManager implements AppVarInterface
     protected function getSessionApiContent() {
         $filename = storage_temp_path('__appvars.json');
         if (!File::exists($filename)) {
+	    File::ensureDirectoryExists(storage_temp_path());
             File::put($filename,json_encode([]));
             return [];
         }
