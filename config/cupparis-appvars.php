@@ -5,6 +5,8 @@ return [
 
     'model' => 'Gecche\Cupparis\AppVars\Models\AppVar',
 
+    'session-type' => 'web',
+
     'vars' => [
         /*
          * '<NAME>' => [

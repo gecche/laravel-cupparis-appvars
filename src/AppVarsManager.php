@@ -3,6 +3,7 @@
 namespace Gecche\Cupparis\AppVars;
 
 use Gecche\Cupparis\AppVars\Contracts\AppVarInterface;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
@@ -43,13 +44,41 @@ class AppVarsManager implements AppVarInterface
 
     }
 
+    protected function getSessionApiContent() {
+        $filename = storage_temp_path('__appvars.json');
+        if (!File::exists($filename)) {
+	    File::ensureDirectoryExists(storage_temp_path());
+            File::put($filename,json_encode([]));
+            return [];
+        }
+        return json_decode(File::get($filename),true);
+    }
+
+    protected function setSessionApiContent($vars) {
+        $filename = storage_temp_path('__appvars.json');
+        File::put($filename,json_encode($vars));
+    }
+
     public function setSessionValue($name, $value, $userId = null)
     {
         $userId = $this->resolveUser($userId);
         if (!in_array($name, $this->sessionableVars))
             return;
         $fullUserName = $this->createFullUserName($name, $userId);
-        Session::put($fullUserName, $value);
+        $sessionType = Arr::get($this->config, 'session-type', 'web');
+        switch ($sessionType) {
+            case 'web':
+                Session::put($fullUserName, $value);
+                break;
+            case 'api':
+                $vars = $this->getSessionApiContent();
+                $vars[$name] = $value;
+                $this->setSessionApiContent($vars);
+                break;
+            default:
+                break;
+        }
+
     }
 
     public function setValue($name, $value, $userId = null)
@@ -57,7 +86,7 @@ class AppVarsManager implements AppVarInterface
         $userId = $this->resolveUser($userId);
         $this->setSessionValue($name, $value, $userId);
 
-        $appVarModel = $this->findDbVar($name,$userId);
+        $appVarModel = $this->findDbVar($name, $userId);
         if ($appVarModel) {
             $appVarModel->value = $value;
             $appVarModel->save();
@@ -80,12 +109,13 @@ class AppVarsManager implements AppVarInterface
         return current($appVarData);
     }
 
-    public function getOptions($name, $userId = null) {
+    public function getOptions($name, $userId = null)
+    {
         $methodName = 'getOptions' . Str::studly($name);
-        if (method_exists($this->modelName,$methodName)) {
+        if (method_exists($this->modelName, $methodName)) {
             return ($this->modelName)::$methodName($userId);
         }
-        return Arr::get(Arr::get($this->config,$name,[]),'options',[]);
+        return Arr::get(Arr::get($this->config, $name, []), 'options', []);
     }
 
     protected function resolveUser($userId = null)
@@ -100,7 +130,7 @@ class AppVarsManager implements AppVarInterface
 
     protected function getDbVar($name, $userId = null)
     {
-        $appVarModel = $this->findDbVar($name,$userId) ?: $this->initializeDbVar($name,$userId);
+        $appVarModel = $this->findDbVar($name, $userId) ?: $this->initializeDbVar($name, $userId);
         return [$name => $appVarModel->value];
     }
 
@@ -123,9 +153,27 @@ class AppVarsManager implements AppVarInterface
     protected function getSessionVar($name, $userId = null)
     {
         $fullUserName = $this->createFullUserName($name, $userId);
-        if (in_array($name, $this->sessionableVars) && Session::has($fullUserName)) {
-            return [$name => Session::get($fullUserName)];
+        if (in_array($name, $this->sessionableVars)) {
+
+            $sessionType = Arr::get($this->config, 'session-type', 'web');
+            switch ($sessionType) {
+                case 'web':
+                    if (Session::has($fullUserName)) {
+                        return [$name => Session::get($fullUserName)];
+                    } else {
+                        return null;
+                    }
+                case 'api':
+                    $vars = $this->getSessionApiContent();
+                    if (array_key_exists($name,$vars)) {
+                        return [$name => $vars[$name]];
+                    }
+                    return null;
+                default:
+                    break;
+            }
         }
+
         return null;
     }
 
